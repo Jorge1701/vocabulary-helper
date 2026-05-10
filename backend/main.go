@@ -43,8 +43,9 @@ func main() {
 			Sources:    map[string]string{},
 		}
 
-		var dicioResult dicio.DicioSearch
 		conjugacaoResult := conjugacao.FindInConjugacao(word)
+		lingueeResult := linguee.FindInLinguee(word)
+		var dicioResult dicio.DicioSearch
 
 		if conjugacaoResult.Found {
 			searchResult.Type = "Verb"
@@ -53,12 +54,10 @@ func main() {
 			searchResult.Sources["Conjugacao"] = conjugacaoResult.Source
 
 			fmt.Println(conjugacaoResult.SearchWord)
-			dicioResult = dicio.FindInDicio(conjugacaoResult.SearchWord)
+			dicioResult = dicio.FindInDicio(conjugacaoResult.VerbInfo.Infinitive)
 		} else {
 			dicioResult = dicio.FindInDicio(word)
 		}
-
-		lingueeResult := linguee.FindInLinguee(word)
 
 		if !dicioResult.Found && !conjugacaoResult.Found && !lingueeResult.Found {
 			http.Error(w, `{"error":"word not found"}`, http.StatusNotFound)
