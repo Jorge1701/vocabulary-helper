@@ -11,6 +11,7 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import ConjugateIcon from "@mui/icons-material/TableChart";
 
 import SectionHeader from "./SectionHeader";
+import Sources from "./Sources";
 
 export default function SearchResults({ results }) {
 
@@ -23,7 +24,7 @@ export default function SearchResults({ results }) {
             <Stack direction={{ xs: "column", sm: "row" }} gap={3} sx={{ alignItems: { sm: "center" }, justifyContent: "space-between" }}>
               <Box>
                 <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: 2 }}>Português · Brasil</Typography>
-                <Typography variant="h3" sx={{ fontWeight: 700, lineHeight: 1.1 }}>{ results.search_word }</Typography>
+                <Typography variant="h3" sx={{ fontWeight: 700, lineHeight: 1.1 }}>{ results.found_word }</Typography>
               </Box>
               <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
               <Box sx={{ textAlign: "right" }}>
@@ -80,15 +81,17 @@ export default function SearchResults({ results }) {
 
         { /* Sinonimos */ }
 
-        <Box sx={{ mb: 4 }}>
-          <SectionHeader icon={<SwapHorizIcon color="primary" />} title="Sinónimos" />
+				{ results.synonyms && (
+          <Box sx={{ mb: 4 }}>
+            <SectionHeader icon={<SwapHorizIcon color="primary" />} title="Sinónimos" />
 
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            { results.synonyms.map((s) => (
-              <Chip key={s} label={s} variant="outlined" sx={{ borderRadius: 2 }} />
-            )) }
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+              { results.synonyms.map((s) => (
+                <Chip key={s} label={s} variant="outlined" sx={{ borderRadius: 2 }} />
+              )) }
+            </Box>
           </Box>
-        </Box>
+        ) }
 
 
         { /* Info del verbo */ }
@@ -170,6 +173,17 @@ export default function SearchResults({ results }) {
             </Grid>
           </Box>
         ) }
+
+
+        { /* Sources */ }
+
+				<Sources sources={
+          [{ label: "Dicio", url: results.sources.dicio },
+            { label: "Conjugacao", url: results.sources.conjugacao },
+            { label: "Linguee", url: results.sources.linguee },
+            { label: "Reverso context", url: `https://context.reverso.net/traduccion/portugues-espanol/${results.input_word}` },
+          ].filter(item => item.url !== undefined)
+        }/>
 
     </>
   )
