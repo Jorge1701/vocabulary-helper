@@ -15,8 +15,26 @@ type WordInfo struct {
 	LingueeSearch     *linguee.LingueeSearch          `json:"linguee_search,omitempty"`
 }
 
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*") // TODO fix domain
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// Handle preflight requests
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
-	http.HandleFunc("/word/{word}", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/word/{word}", func(w http.ResponseWriter, r *http.Request) {
 		word := strings.TrimSpace(strings.ToLower(r.PathValue("word")))
 		if word == "" {
 			http.Error(w, `{"error":"word is required"}`, http.StatusBadRequest)
@@ -43,5 +61,7 @@ func main() {
 		})
 	})
 
-	http.ListenAndServe(":8080", nil)
+	handler := enableCORS(mux)
+
+	http.ListenAndServe(":8080", handler)
 }
