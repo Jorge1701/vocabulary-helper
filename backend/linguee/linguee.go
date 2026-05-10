@@ -2,6 +2,7 @@ package linguee
 
 import (
 	"fmt"
+	"vocabulary-helper/model"
 	"vocabulary-helper/utils"
 
 	"github.com/PuerkitoBio/goquery"
@@ -12,17 +13,12 @@ const (
 	LINGUEE_URL = "https://www.linguee.es/espanol-portugues/search?query="
 )
 
-type Example struct {
-	Source string `json:"source,omitempty"`
-	Target string `json:"target,omitempty"`
-}
-
 type LingueeSearch struct {
-	Found       bool      `json:"found"`
-	SearchWord  string    `json:"search_word"`
-	Source      string    `json:"source_url,omitempty"`
-	Translation string    `json:"translation,omitempty"`
-	Examples    []Example `json:"examples,omitempty"`
+	Found       bool
+	SearchWord  string
+	Source      string
+	Translation string
+	Examples    []model.Example
 }
 
 func FindLingueeSearch(word string) LingueeSearch {
@@ -52,9 +48,9 @@ func searchForLingueeInfo(word, url string) LingueeSearch {
 			lingueeSearch.Translation = info.Find("div.translation h3.translation_desc a.featured").First().Text()
 
 			// Get examples
-			lingueeSearch.Examples = []Example{}
+			lingueeSearch.Examples = []model.Example{}
 			info.Find("div.translation div.example_lines span.tag_e").Each(func(i int, s *goquery.Selection) {
-				lingueeSearch.Examples = append(lingueeSearch.Examples, Example{
+				lingueeSearch.Examples = append(lingueeSearch.Examples, model.Example{
 					Source: s.Find("span.tag_s").First().Text(),
 					Target: s.Find("span.tag_t").First().Text(),
 				})

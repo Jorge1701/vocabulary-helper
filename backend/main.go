@@ -7,6 +7,7 @@ import (
 	"vocabulary-helper/conjugations"
 	"vocabulary-helper/dictionary"
 	"vocabulary-helper/linguee"
+	"vocabulary-helper/model"
 )
 
 type WordInfo struct {
@@ -41,24 +42,44 @@ func main() {
 			return
 		}
 
+		lingueeSearch := linguee.FindLingueeSearch(word)
+		dictionaryInfo := dictionary.FindDictionaryInfo(word)
 		verbInfo := conjugations.FindVerbInfo(word)
-		dictionaryInfo := dictionary.DictionarySearch{}
-		lingueeSearch := linguee.LingueeSearch{}
+
+		if !dictionaryInfo.Found && !verbInfo.Found && !lingueeSearch.Found {
+			http.Error(w, `{"error":"word not found"}`, http.StatusNotFound)
+			return
+		}
+
+		searchResult := model.SearchResult{
+			SearchWord: word,
+			Examples:   []model.Example{},
+			Sources:    map[string]string{},
+		}
+
+		if lingueeSearch.Found {
+			searchResult.FoundWord = lingueeSearch.SearchWord
+			searchResult.Translation = lingueeSearch.Translation
+			searchResult.Examples = lingueeSearch.Examples
+
+			searchResult.Sources["Linguee"] = lingueeSearch.Source
+		}
+
+		if dictionaryInfo.Found {
+			searchResult.Meanings = dictionaryInfo.Meanings
+			searchResult.Synonyms = dictionaryInfo.Synonyms
+
+			searchResult.Sources["Dicio"] = dictionaryInfo.Source
+		}
 
 		if verbInfo.Found {
-			dictionaryInfo = dictionary.FindDictionaryInfo(verbInfo.VerbInfo.Infinitivo)
-			lingueeSearch = linguee.FindLingueeSearch(verbInfo.VerbInfo.Infinitivo)
-		} else {
-			dictionaryInfo = dictionary.FindDictionaryInfo(word)
-			lingueeSearch = linguee.FindLingueeSearch(word)
+			searchResult.VerbInfo = &verbInfo.VerbInfo
+
+			searchResult.Sources["Conjugacao"] = verbInfo.Source
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(WordInfo{
-			DictionarySearch:  &dictionaryInfo,
-			ConjugationSearch: &verbInfo,
-			LingueeSearch:     &lingueeSearch,
-		})
+		json.NewEncoder(w).Encode(searchResult)
 	})
 
 	handler := enableCORS(mux)

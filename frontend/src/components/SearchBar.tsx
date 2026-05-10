@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Box, Typography, TextField, Button, Divider, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import { SearchResult } from "../model/model";
 
-export default function SearchBar({ setResults }) {
+export default function SearchBar(props: {
+  setResults: (results: SearchResult) => void
+}) {
   const [ input, setInput ] = useState('')
   const [ loading, setLoading ] = useState(false)
 
@@ -14,26 +17,13 @@ export default function SearchBar({ setResults }) {
     if (input === undefined || input === '') {
       return
     }
+
     setLoading(true)
 
     const response = await fetch(`http://localhost:8080/word/${input}`)
-    const data = await response.json()
-    setResults({
-      input_word: input,
-      found_word: data.linguee_search.search_word,
-      translation: data.linguee_search.translation,
-      meanings: data.dictionary_search.meanings,
-      examples: data.linguee_search.examples,
-      synonyms: data.dictionary_search.sinonimos,
-      verb_info: data.conjugation_search.found ? data.conjugation_search.verb_info : undefined,
-      conjugations: data.conjugation_search.found ? data.conjugation_search : undefined,
-      sources: {
-        dicio: data.dictionary_search.source_url,
-        conjugacao: data.conjugation_search.source_url,
-        linguee: data.linguee_search.source_url,
-      }
-    })
+    const data = await (response.json() as Promise<SearchResult>)
 
+    props.setResults(data)
     setLoading(false)
   }
 

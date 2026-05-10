@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import './index.css'
-import App from './App.jsx'
+import App from './App.tsx'
 
 const darkTheme = createTheme({
   palette: {

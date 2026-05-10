@@ -3,44 +3,22 @@ package conjugations
 import (
 	"fmt"
 	"strings"
+	"vocabulary-helper/model"
 	"vocabulary-helper/utils"
 
 	"github.com/gocolly/colly/v2"
 )
 
 const (
-	COLLY_CACHE_DIR       = "./colly_cache"
 	CONJUGACAO_SEARCH_URL = "https://www.conjugacao.com.br/busca.php?q="
 	CONJUGACAO_DIRECT_URL = "https://www.conjugacao.com.br/verbo-"
 )
 
-type Conjugations struct {
-	FirstPersonSingular  string `json:"first_per_sin,omitempty"`
-	SecondPersonSingular string `json:"second_per_sin,omitempty"`
-	ThirdPersonSingular  string `json:"third_per_sin,omitempty"`
-	FirstPersonPlural    string `json:"first_per_plu,omitempty"`
-	SecondPersonPlural   string `json:"second_per_plu,omitempty"`
-	ThirdPersonPlural    string `json:"third_per_plu,omitempty"`
-}
-
-type VerbInfo struct {
-	Infinitivo        string `json:"infinitivo,omitempty"`
-	TipoDeVerbo       string `json:"tipo_de_verbo,omitempty"`
-	Gerundio          string `json:"gerundio,omitempty"`
-	ParticipioPassado string `json:"participio_passado,omitempty"`
-}
-
 type ConjugationSearch struct {
-	Found                    bool          `json:"found"`
-	SearchWord               string        `json:"search_word"`
-	Source                   string        `json:"source_url,omitempty"`
-	VerbInfo                 *VerbInfo     `json:"verb_info,omitempty"`
-	Presente                 *Conjugations `json:"presente,omitempty"`
-	PreteritoImperfeito      *Conjugations `json:"preterito_imperfeito,omitempty"`
-	PreteritoPerfeito        *Conjugations `json:"preterito_perfeito,omitempty"`
-	PreteritoMaisQuePerfeito *Conjugations `json:"preterito_mais_que_perfeito,omitempty"`
-	FuturoDoPresente         *Conjugations `json:"futuro_do_presente,omitempty"`
-	FuturoDoPreterito        *Conjugations `json:"futuro_do_preterito,omitempty"`
+	Found      bool
+	SearchWord string
+	Source     string
+	VerbInfo   model.VerbInfo
 }
 
 func FindVerbInfo(word string) ConjugationSearch {
@@ -68,15 +46,15 @@ func searchForVerbInfo(word, url string, deepSearch bool) ConjugationSearch {
 			verbInfo.Source = url
 
 			// Obtain info
-			verbInfo.VerbInfo = &VerbInfo{
-				Gerundio:          parseColon(info.Find("p.verb-info--main > span:nth-child(1) > span > span").First().Text()),
-				ParticipioPassado: parseColon(info.Find("p.verb-info--main > span:nth-child(2) > span > span.f").First().Text()),
-				Infinitivo:        parseColon(info.Find("p.verb-info--main > span:nth-child(3)").First().Text()),
-				TipoDeVerbo:       parseColon(info.Find("p.verb-info--sec > span:nth-child(1)").First().Text()),
+			verbInfo.VerbInfo = model.VerbInfo{
+				Type:             parseColon(info.Find("p.verb-info--sec > span:nth-child(1)").First().Text()),
+				Infinitive:       parseColon(info.Find("p.verb-info--main > span:nth-child(3)").First().Text()),
+				PresentPaticiple: parseColon(info.Find("p.verb-info--main > span:nth-child(1) > span > span").First().Text()),
+				PastParticiple:   parseColon(info.Find("p.verb-info--main > span:nth-child(2) > span > span.f").First().Text()),
 			}
 
 			// Obtain conjugacao
-			verbInfo.Presente = &Conjugations{
+			verbInfo.VerbInfo.SimplePresent = model.VerbConjugations{
 				FirstPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(1) > p > span:nth-child(1) > span.f").First().Text(),
 				SecondPersonSingular: conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(1) > p > span:nth-child(3) > span.f").First().Text(),
 				ThirdPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(1) > p > span:nth-child(5) > span.f").First().Text(),
@@ -85,7 +63,7 @@ func searchForVerbInfo(word, url string, deepSearch bool) ConjugationSearch {
 				ThirdPersonPlural:    conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(1) > p > span:nth-child(11) > span.f").First().Text(),
 			}
 
-			verbInfo.PreteritoImperfeito = &Conjugations{
+			verbInfo.VerbInfo.ImperfectPast = model.VerbConjugations{
 				FirstPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(2) > p > span:nth-child(1) > span.f").First().Text(),
 				SecondPersonSingular: conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(2) > p > span:nth-child(3) > span.f").First().Text(),
 				ThirdPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(2) > p > span:nth-child(5) > span.f").First().Text(),
@@ -93,7 +71,7 @@ func searchForVerbInfo(word, url string, deepSearch bool) ConjugationSearch {
 				SecondPersonPlural:   conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(2) > p > span:nth-child(9) > span.f").First().Text(),
 				ThirdPersonPlural:    conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(2) > p > span:nth-child(11) > span.f").First().Text(),
 			}
-			verbInfo.PreteritoPerfeito = &Conjugations{
+			verbInfo.VerbInfo.SimplePast = model.VerbConjugations{
 				FirstPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(3) > p > span:nth-child(1) > span.f").First().Text(),
 				SecondPersonSingular: conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(3) > p > span:nth-child(3) > span.f").First().Text(),
 				ThirdPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(3) > p > span:nth-child(5) > span.f").First().Text(),
@@ -101,7 +79,7 @@ func searchForVerbInfo(word, url string, deepSearch bool) ConjugationSearch {
 				SecondPersonPlural:   conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(3) > p > span:nth-child(9) > span.f").First().Text(),
 				ThirdPersonPlural:    conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(3) > p > span:nth-child(11) > span.f").First().Text(),
 			}
-			verbInfo.PreteritoMaisQuePerfeito = &Conjugations{
+			verbInfo.VerbInfo.PerfectPast = model.VerbConjugations{
 				FirstPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(4) > p > span:nth-child(1) > span.f").First().Text(),
 				SecondPersonSingular: conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(4) > p > span:nth-child(3) > span.f").First().Text(),
 				ThirdPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(4) > p > span:nth-child(5) > span.f").First().Text(),
@@ -109,7 +87,7 @@ func searchForVerbInfo(word, url string, deepSearch bool) ConjugationSearch {
 				SecondPersonPlural:   conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(4) > p > span:nth-child(9) > span.f").First().Text(),
 				ThirdPersonPlural:    conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(4) > p > span:nth-child(11) > span.f").First().Text(),
 			}
-			verbInfo.FuturoDoPresente = &Conjugations{
+			verbInfo.VerbInfo.SimpleFuture = model.VerbConjugations{
 				FirstPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(5) > p > span:nth-child(1) > span.f").First().Text(),
 				SecondPersonSingular: conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(5) > p > span:nth-child(3) > span.f").First().Text(),
 				ThirdPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(5) > p > span:nth-child(5) > span.f").First().Text(),
@@ -117,7 +95,7 @@ func searchForVerbInfo(word, url string, deepSearch bool) ConjugationSearch {
 				SecondPersonPlural:   conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(5) > p > span:nth-child(9) > span.f").First().Text(),
 				ThirdPersonPlural:    conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(5) > p > span:nth-child(11) > span.f").First().Text(),
 			}
-			verbInfo.FuturoDoPreterito = &Conjugations{
+			verbInfo.VerbInfo.Conditional = model.VerbConjugations{
 				FirstPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(6) > p > span:nth-child(1) > span.f").First().Text(),
 				SecondPersonSingular: conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(6) > p > span:nth-child(3) > span.f").First().Text(),
 				ThirdPersonSingular:  conjugacao.Find("div:nth-child(1) > div > div > div:nth-child(6) > p > span:nth-child(5) > span.f").First().Text(),

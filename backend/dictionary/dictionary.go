@@ -15,11 +15,11 @@ const (
 )
 
 type DictionarySearch struct {
-	Found      bool     `json:"found"`
-	SearchWord string   `json:"search_word"`
-	Source     string   `json:"source_url,omitempty"`
-	Meanings   []string `json:"meanings,omitempty"`
-	Sinonimos  []string `json:"sinonimos,omitempty"`
+	Found      bool
+	SearchWord string
+	Source     string
+	Meanings   []string
+	Synonyms   []string
 }
 
 func FindDictionaryInfo(word string) DictionarySearch {
@@ -55,9 +55,9 @@ func searchForDictionaryInfo(word, url string, deepSearch bool) DictionarySearch
 			})
 
 			// Obtaing sinonimos
-			dictionaryInfo.Sinonimos = []string{}
+			dictionaryInfo.Synonyms = []string{}
 			mainContent.Find("div.wrap-section > h2.subtitle-significado ~ p.adicional.sinonimos a").Each(func(i int, s *goquery.Selection) {
-				dictionaryInfo.Sinonimos = append(dictionaryInfo.Sinonimos, s.Text())
+				dictionaryInfo.Synonyms = append(dictionaryInfo.Synonyms, s.Text())
 			})
 		} else if resultados.Length() > 0 && deepSearch {
 			match := resultados.Find("li a").FilterFunction(func(i int, s *goquery.Selection) bool {

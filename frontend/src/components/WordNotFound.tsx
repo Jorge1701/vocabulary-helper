@@ -3,7 +3,9 @@ import SearchOffIcon from "@mui/icons-material/SearchOff";
 
 import Sources from "./Sources";
 
-export default function WordNotFound({ word }) {
+export default function WordNotFound(props: {
+  word: string,
+}) {
   return (
     <Box>
 
@@ -11,16 +13,16 @@ export default function WordNotFound({ word }) {
         <SearchOffIcon sx={{ fontSize: 52, color: "text.secondary", opacity: 0.4, mb: 2 }} />
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
           No se encontraron resultados para{" "}
-          <Typography component="span" sx={{ fontWeight: 700, color: "primary.main" }}>"{word}"</Typography>
+          <Typography component="span" sx={{ fontWeight: 700, color: "primary.main" }}>"{props.word}"</Typography>
         </Typography>
         <Typography variant="body2" sx={{ color: "text.secondary" }}>Verificá la ortografía o intentá con otra palabra.</Typography>
       </Box>
 
       <Sources title="También puedes probar:" sources={
-        [{ label: "Reverso context", url: `https://context.reverso.net/traduccion/portugues-espanol/${word}` },
-          { label: "Dicio", url: `https://www.dicio.com.br/pesquisa.php?q=${word}` },
-          { label: "Conjugacao", url: `https://www.conjugacao.com.br/busca.php?q=${word}` },
-          { label: "Linguee", url: `https://www.linguee.es/espanol-portugues/search?query=${word}` },
+        [{ label: "Reverso context", url: `https://context.reverso.net/traduccion/portugues-espanol/${props.word}` },
+          { label: "Dicio", url: `https://www.dicio.com.br/pesquisa.php?q=${props.word}` },
+          { label: "Conjugacao", url: `https://www.conjugacao.com.br/busca.php?q=${props.word}` },
+          { label: "Linguee", url: `https://www.linguee.es/espanol-portugues/search?query=${props.word}` },
         ].filter(item => item.url !== undefined)
       }/>
 

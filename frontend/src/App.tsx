@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import './App.css'
+import "./App.css"
 import { Box, Divider } from "@mui/material";
 
 import SearchBar from './components/SearchBar';
 import SearchResults from './components/SearchResults';
 import WordNotFound from './components/WordNotFound';
 import StartMessage from './components/StartMessage';
+import { SearchResult } from './model/model';
 
 function App() {
-  const [results, setResults] = useState(null)
+  const [results, setResults] = useState<SearchResult | null>(null)
 
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", px: 3, py: 6 }}>
@@ -22,7 +23,7 @@ function App() {
       )}
 
       {results && results.translation === undefined && (
-        <WordNotFound word={results.input_word} />
+        <WordNotFound word={results.search_word} />
       )}
 
 			{results && results.translation !== undefined && (

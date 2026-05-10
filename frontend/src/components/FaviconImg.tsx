@@ -1,5 +1,7 @@
-export default function FaviconImg({ url }) {
-  const domain = new URL(url).hostname;
+export default function FaviconImg(props: {
+  url: string
+}) {
+  const domain = new URL(props.url).hostname;
 
   return (
     <img

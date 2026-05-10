@@ -4,6 +4,8 @@ import {
   TableRow, Stack
 } from "@mui/material";
 
+import { SearchResult } from "../model/model";
+
 import TranslateIcon from "@mui/icons-material/Translate";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
@@ -13,7 +15,9 @@ import ConjugateIcon from "@mui/icons-material/TableChart";
 import SectionHeader from "./SectionHeader";
 import Sources from "./Sources";
 
-export default function SearchResults({ results }) {
+export default function SearchResults(props: {
+  results: SearchResult,
+}) {
 
   return (
     <>
@@ -21,15 +25,15 @@ export default function SearchResults({ results }) {
 
         <Card elevation={0} sx={{ mb: 4, border: "1px solid", borderColor: "divider", borderRadius: 3}}>
           <CardContent sx={{ p: 4 }}>
-            <Stack direction={{ xs: "column", sm: "row" }} gap={3} sx={{ alignItems: { sm: "center" }, justifyContent: "space-between" }}>
+            <Stack direction={{ xs: "column", sm: "row" }} sx={{ gap: 3, alignItems: { sm: "center" }, justifyContent: "space-between" }}>
               <Box>
                 <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: 2 }}>Português · Brasil</Typography>
-                <Typography variant="h3" sx={{ fontWeight: 700, lineHeight: 1.1 }}>{ results.found_word }</Typography>
+                <Typography variant="h3" sx={{ fontWeight: 700, lineHeight: 1.1 }}>{ props.results.found_word }</Typography>
               </Box>
               <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
               <Box sx={{ textAlign: "right" }}>
                 <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: 2 }}>Traducción al Español</Typography>
-                <Typography variant="h3" sx={{ fontWeight: 700, color: "primary.main", lineHeight: 1.1 }}>{ results.translation }</Typography>
+                <Typography variant="h3" sx={{ fontWeight: 700, color: "primary.main", lineHeight: 1.1 }}>{ props.results.translation }</Typography>
               </Box>
             </Stack>
           </CardContent>
@@ -38,32 +42,35 @@ export default function SearchResults({ results }) {
 
         { /* Significados */ }
 
-        <Box sx={{ mb: 4 }}>
-          <SectionHeader icon={<MenuBookIcon color="primary" />} title="Significados" />
 
-          <Stack sx={{ gap: 1.5 }}>
-            { results.meanings.map((m, i) => (
-              <Card key={i} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-                <CardContent sx={{ py: "12px !important", px: 2.5 }}>
-                  <Stack direction="row" sx={{ gap: 2, alignItems: "flex-start" }} >
-                    <Typography sx={{ color: "primary.main", fontWeight: 700, minWidth: 24 }}>{ i + 1 }.</Typography>
-                    <Typography>{ m }</Typography>
-                  </Stack>
-                </CardContent>
-              </Card>
-            )) }
-          </Stack>
-        </Box>
+				{ props.results.meanings && (
+          <Box sx={{ mb: 4 }}>
+            <SectionHeader icon={<MenuBookIcon color="primary" />} title="Significados" />
+
+            <Stack sx={{ gap: 1.5 }}>
+              { props.results.meanings.map((m, i) => (
+                <Card key={i} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+                  <CardContent sx={{ py: "12px !important", px: 2.5 }}>
+                    <Stack direction="row" sx={{ gap: 2, alignItems: "flex-start" }} >
+                      <Typography sx={{ color: "primary.main", fontWeight: 700, minWidth: 24 }}>{ i + 1 }.</Typography>
+                      <Typography>{ m }</Typography>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              )) }
+            </Stack>
+	        </Box>
+        ) }
 
 
         { /* Ejemplos de uso */ }
 
-        { results.examples && (
+        { props.results.examples && (
           <Box sx={{ mb: 4 }}>
             <SectionHeader icon={<FormatQuoteIcon color="primary" />} title="Ejemplos de uso" />
 
             <Stack>
-              { results.examples.map((ex, i) => (
+              { props.results.examples.map((ex, i) => (
                 <Card key={i} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}>
                   <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", px: 2.5, py: 1.5 }}>
                     <Typography sx={{ fontWeight: 500 }}>{ ex.source }</Typography>
@@ -81,12 +88,12 @@ export default function SearchResults({ results }) {
 
         { /* Sinonimos */ }
 
-				{ results.synonyms && (
+				{ props.results.synonyms && (
           <Box sx={{ mb: 4 }}>
             <SectionHeader icon={<SwapHorizIcon color="primary" />} title="Sinónimos" />
 
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-              { results.synonyms.map((s) => (
+              { props.results.synonyms.map((s) => (
                 <Chip key={s} label={s} variant="outlined" sx={{ borderRadius: 2 }} />
               )) }
             </Box>
@@ -96,7 +103,7 @@ export default function SearchResults({ results }) {
 
         { /* Info del verbo */ }
 
-        { results.verb_info && (
+        { props.results.verb_info && (
           <Box sx={{ mb: 4 }}>
             <SectionHeader icon={<TranslateIcon color="primary" />} title="Información del verbo" />
 
@@ -107,14 +114,14 @@ export default function SearchResults({ results }) {
                     <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 0.5 }}>Tipo</Typography>
                     <Chip
                       size="small"
-                      label={ results.verb_info.tipo_de_verbo === "regular" ? "Regular" : "Irregular" }
-                      color={ results.verb_info.tipo_de_verbo === "regular" ? "success" : "warning" }
+                      label={ props.results.verb_info.type === "regular" ? "Regular" : "Irregular" }
+                      color={ props.results.verb_info.type === "regular" ? "success" : "warning" }
                     />
                   </Grid>
                   {[
-                    { label: "Infinitivo", value: results.verb_info.infinitivo },
-                    { label: "Participio", value: results.verb_info.participio_passado },
-                    { label: "Gerúndio", value: results.verb_info.gerundio },
+                    { label: "Infinitivo", value: props.results.verb_info.infinitive },
+                    { label: "Participio", value: props.results.verb_info.past_participle },
+                    { label: "Gerúndio", value: props.results.verb_info.present_participle },
                   ].map(({ label, value }) => (
                     <Grid key={label} size={{ xs: 6, sm: 3 }} sx={{ textAlign: "center" }}>
                       <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 0.5 }}>{ label }</Typography>
@@ -130,18 +137,18 @@ export default function SearchResults({ results }) {
 
         { /* Tablas de conjugaciones */ }
 
-        { results.conjugations && (
+        { props.results.verb_info && (
           <Box sx={{ mb: 4 }}>
             <SectionHeader icon={<ConjugateIcon color="primary" />} title="Conjugaciones" />
 
             <Grid container spacing={2}>
               {[
-                { label: "Presente", values: results.conjugations.presente },
-                { label: "Pretérito Imperfeito", values: results.conjugations.preterito_imperfeito },
-                { label: "Pretérito Perfeito", values: results.conjugations.preterito_perfeito },
-                { label: "Pretérito Mais-que-perfeito", values: results.conjugations.preterito_mais_que_perfeito },
-                { label: "Futuro do Presente", values: results.conjugations.futuro_do_presente },
-                { label: "Futuro do Pretérito", values: results.conjugations.futuro_do_preterito },
+                { label: "Presente", values: props.results.verb_info.simple_present },
+                { label: "Pretérito Imperfeito", values: props.results.verb_info.imperfect_past },
+                { label: "Pretérito Perfeito", values: props.results.verb_info.simple_past },
+                { label: "Pretérito Mais-que-perfeito", values: props.results.verb_info.perfect_past },
+                { label: "Futuro do Presente", values: props.results.verb_info.simple_future },
+                { label: "Futuro do Pretérito", values: props.results.verb_info.conditional },
               ].map(({ label, values }) => (
                 <Grid size={{ xs: 12, sm: 6, md: 4 }} key={label}>
                   <Card sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, height: "100%" }}>
@@ -177,13 +184,9 @@ export default function SearchResults({ results }) {
 
         { /* Sources */ }
 
-				<Sources sources={
-          [{ label: "Dicio", url: results.sources.dicio },
-            { label: "Conjugacao", url: results.sources.conjugacao },
-            { label: "Linguee", url: results.sources.linguee },
-            { label: "Reverso context", url: `https://context.reverso.net/traduccion/portugues-espanol/${results.input_word}` },
-          ].filter(item => item.url !== undefined)
-        }/>
+				{ props.results.sources && (
+					<Sources title="Fuentes" sources={props.results.sources}/>
+        ) }
 
     </>
   )
