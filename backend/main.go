@@ -6,11 +6,13 @@ import (
 	"strings"
 	"vocabulary-helper/conjugations"
 	"vocabulary-helper/dictionary"
+	"vocabulary-helper/linguee"
 )
 
 type WordInfo struct {
 	DictionarySearch  *dictionary.DictionarySearch    `json:"dictionary_search,omitempty"`
 	ConjugationSearch *conjugations.ConjugationSearch `json:"conjugation_search,omitempty"`
+	LingueeSearch     *linguee.LingueeSearch          `json:"linguee_search,omitempty"`
 }
 
 func main() {
@@ -23,17 +25,21 @@ func main() {
 
 		verbInfo := conjugations.FindVerbInfo(word)
 		dictionaryInfo := dictionary.DictionarySearch{}
+		lingueeSearch := linguee.LingueeSearch{}
 
 		if verbInfo.Found {
 			dictionaryInfo = dictionary.FindDictionaryInfo(verbInfo.VerbInfo.Infinitivo)
+			lingueeSearch = linguee.FindLingueeSearch(verbInfo.VerbInfo.Infinitivo)
 		} else {
 			dictionaryInfo = dictionary.FindDictionaryInfo(word)
+			lingueeSearch = linguee.FindLingueeSearch(word)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(WordInfo{
 			DictionarySearch:  &dictionaryInfo,
 			ConjugationSearch: &verbInfo,
+			LingueeSearch:     &lingueeSearch,
 		})
 	})
 
