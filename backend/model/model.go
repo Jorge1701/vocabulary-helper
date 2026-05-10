@@ -1,5 +1,10 @@
 package model
 
+type Meaning struct {
+	Text        string `json:"text"`
+	Translation string `json:"translation"`
+}
+
 type Example struct {
 	Source string `json:"source"`
 	Target string `json:"target"`
@@ -32,7 +37,7 @@ type SearchResult struct {
 	FoundWord   string            `json:"found_word,omitempty"`
 	Translation string            `json:"translation,omitempty"`
 	Type        string            `json:"type,omitempty"`
-	Meanings    []string          `json:"meanings,omitempty"`
+	Meanings    []Meaning         `json:"meanings,omitempty"`
 	Examples    []Example         `json:"examples,omitempty"`
 	Synonyms    []string          `json:"synonyms,omitempty"`
 	VerbInfo    *VerbInfo         `json:"verb_info,omitempty"`

@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"vocabulary-helper/conjugacao"
+	"vocabulary-helper/database"
 	"vocabulary-helper/dicio"
 	"vocabulary-helper/linguee"
 	"vocabulary-helper/model"
@@ -27,6 +29,13 @@ func enableCORS(next http.Handler) http.Handler {
 }
 
 func main() {
+	err := database.NormalizeDatabase()
+	if err != nil {
+		fmt.Println("Could not normilize database:", err)
+	} else {
+		fmt.Println("Database normilized")
+	}
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/word/{word}", func(w http.ResponseWriter, r *http.Request) {
@@ -39,22 +48,24 @@ func main() {
 		searchResult := model.SearchResult{
 			SearchWord: word,
 			Type:       "Unknown",
+			Meanings:   []model.Meaning{},
 			Sources:    map[string]string{},
 		}
 
 		conjugacaoResult := conjugacao.FindInConjugacao(word)
 		lingueeResult := linguee.FindInLinguee(word)
-		var dicioResult dicio.DicioSearch
+		databaseSearch := database.FindInDatabase(word)
+		dicioResult := dicio.FindInDicio(word)
 
 		if conjugacaoResult.Found {
 			searchResult.Type = "Verb"
 			searchResult.VerbInfo = &conjugacaoResult.VerbInfo
 
 			searchResult.Sources["Conjugacao"] = conjugacaoResult.Source
+		}
 
+		if dicioResult.FoundWord != word && conjugacaoResult.Found {
 			dicioResult = dicio.FindInDicio(conjugacaoResult.VerbInfo.Infinitive)
-		} else {
-			dicioResult = dicio.FindInDicio(word)
 		}
 
 		if !dicioResult.Found && !conjugacaoResult.Found && !lingueeResult.Found {
@@ -71,10 +82,20 @@ func main() {
 		}
 
 		if dicioResult.Found {
-			searchResult.Meanings = dicioResult.Meanings
+			for _, meaning := range dicioResult.Meanings {
+				searchResult.Meanings = append(searchResult.Meanings, model.Meaning{
+					Text: meaning,
+				})
+			}
 			searchResult.Synonyms = dicioResult.Synonyms
 
 			searchResult.Sources["Dicio"] = dicioResult.Source
+		}
+
+		if databaseSearch.Found {
+			searchResult.Meanings = append(searchResult.Meanings, databaseSearch.Meaning...)
+
+			searchResult.Sources["WikDict"] = databaseSearch.Source
 		}
 
 		w.Header().Set("Content-Type", "application/json")

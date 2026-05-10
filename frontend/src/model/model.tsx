@@ -1,3 +1,8 @@
+export interface Meaning {
+  text: string;
+  translation: string;
+}
+
 export interface Example {
   source: string;
   target: string;
@@ -29,7 +34,7 @@ export interface SearchResult {
   search_word: string;
   found_word?: string;
   translation?: string;
-  meanings?: string[];
+  meanings?: Meaning[];
   examples?: Example[];
   synonyms?: string[];
   verb_info?: VerbInfo;

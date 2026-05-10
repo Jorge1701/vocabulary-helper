@@ -2,6 +2,7 @@ package dicio
 
 import (
 	"fmt"
+	"strings"
 	"vocabulary-helper/utils"
 
 	"github.com/PuerkitoBio/goquery"
@@ -11,14 +12,15 @@ import (
 const (
 	DICIO_SEARCH_URL        = "https://www.dicio.com.br/pesquisa.php?q="
 	DICIO_DIRECT_URL        = "https://www.dicio.com.br"
-	MAX_MEANINGS_TO_EXTRACT = 2
+	MAX_MEANINGS_TO_EXTRACT = 3
 )
 
 type DicioSearch struct {
-	Found    bool
-	Source   string
-	Meanings []string
-	Synonyms []string
+	Found     bool
+	FoundWord string
+	Source    string
+	Meanings  []string
+	Synonyms  []string
 }
 
 func FindInDicio(word string) DicioSearch {
@@ -44,9 +46,12 @@ func fetchAndParseDicioInfo(word, url string, deepSearch bool) DicioSearch {
 			dictionaryInfo.Found = true
 			dictionaryInfo.Source = url
 
+			// Obtain found word
+			dictionaryInfo.FoundWord = strings.TrimSpace(strings.ToLower(mainContent.Find("div.title-header h1").First().Text()))
+
 			// Obtain meanings
 			dictionaryInfo.Meanings = []string{}
-			spans := mainContent.Find("p.significado span:not(.cl)")
+			spans := mainContent.Find("p.significado > span:not(.cl)")
 			maxMeanings := min(spans.Length(), MAX_MEANINGS_TO_EXTRACT)
 			spans.Slice(0, maxMeanings).Each(func(i int, s *goquery.Selection) {
 				dictionaryInfo.Meanings = append(dictionaryInfo.Meanings, s.Text())

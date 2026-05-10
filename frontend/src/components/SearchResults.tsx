@@ -42,7 +42,6 @@ export default function SearchResults(props: {
 
         { /* Significados */ }
 
-
 				{ props.results.meanings && (
           <Box sx={{ mb: 4 }}>
             <SectionHeader icon={<MenuBookIcon color="primary" />} title="Significados" />
@@ -53,7 +52,7 @@ export default function SearchResults(props: {
                   <CardContent sx={{ py: "12px !important", px: 2.5 }}>
                     <Stack direction="row" sx={{ gap: 2, alignItems: "flex-start" }} >
                       <Typography sx={{ color: "primary.main", fontWeight: 700, minWidth: 24 }}>{ i + 1 }.</Typography>
-                      <Typography>{ m }</Typography>
+                      <Typography>{ m.text }</Typography>
                     </Stack>
                   </CardContent>
                 </Card>
