@@ -47,7 +47,7 @@ func fetchAndParseDicioInfo(word, url string, deepSearch bool) DicioSearch {
 			dictionaryInfo.Source = url
 
 			// Obtain found word
-			dictionaryInfo.FoundWord = strings.TrimSpace(strings.ToLower(mainContent.Find("div.title-header h1").First().Text()))
+			dictionaryInfo.FoundWord = strings.TrimSpace(mainContent.Find("div.title-header h1").First().Text())
 
 			// Obtain meanings
 			dictionaryInfo.Meanings = []string{}

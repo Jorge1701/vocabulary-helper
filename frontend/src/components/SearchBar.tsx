@@ -4,7 +4,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { SearchResult } from "../model/model";
 
 export default function SearchBar(props: {
-  setResults: (results: SearchResult) => void
+  setResults: (results: SearchResult[]) => void
 }) {
   const [ input, setInput ] = useState('')
   const [ loading, setLoading ] = useState(false)
@@ -20,8 +20,8 @@ export default function SearchBar(props: {
 
     setLoading(true)
 
-    const response = await fetch(`http://localhost:8080/word/${input}`)
-    const data = await (response.json() as Promise<SearchResult>)
+    const response = await fetch(`http://localhost:8080/words/${input}`)
+    const data = await (response.json() as Promise<SearchResult[]>)
 
     props.setResults(data)
     setLoading(false)
