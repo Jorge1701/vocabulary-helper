@@ -32,8 +32,8 @@ type VerbInfo struct {
 
 type ConjugationSearch struct {
 	Found                    bool          `json:"found"`
-	Source                   string        `json:"source_url,omitempty"`
 	SearchWord               string        `json:"search_word"`
+	Source                   string        `json:"source_url,omitempty"`
 	VerbInfo                 *VerbInfo     `json:"verb_info,omitempty"`
 	Presente                 *Conjugations `json:"presente,omitempty"`
 	PreteritoImperfeito      *Conjugations `json:"preterito_imperfeito,omitempty"`

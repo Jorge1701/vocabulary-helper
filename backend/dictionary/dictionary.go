@@ -16,8 +16,8 @@ const (
 
 type DictionarySearch struct {
 	Found      bool     `json:"found"`
-	Source     string   `json:"source_url,omitempty"`
 	SearchWord string   `json:"search_word"`
+	Source     string   `json:"source_url,omitempty"`
 	Meanings   []string `json:"meanings,omitempty"`
 	Sinonimos  []string `json:"sinonimos,omitempty"`
 }
