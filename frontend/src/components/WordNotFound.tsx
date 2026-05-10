@@ -18,13 +18,12 @@ export default function WordNotFound(props: {
         <Typography variant="body2" sx={{ color: "text.secondary" }}>Verificá la ortografía o intentá con otra palabra.</Typography>
       </Box>
 
-      <Sources title="También puedes probar:" sources={
-        [{ label: "Reverso context", url: `https://context.reverso.net/traduccion/portugues-espanol/${props.word}` },
-          { label: "Dicio", url: `https://www.dicio.com.br/pesquisa.php?q=${props.word}` },
-          { label: "Conjugacao", url: `https://www.conjugacao.com.br/busca.php?q=${props.word}` },
-          { label: "Linguee", url: `https://www.linguee.es/espanol-portugues/search?query=${props.word}` },
-        ].filter(item => item.url !== undefined)
-      }/>
+      <Sources title="También puedes probar:" sources={{
+        "Reverso context": `https://context.reverso.net/traduccion/portugues-espanol/${props.word}`,
+        "Dicio": `https://www.dicio.com.br/pesquisa.php?q=${props.word}` ,
+        "Conjugacao": `https://www.conjugacao.com.br/busca.php?q=${props.word}` ,
+        "Linguee" : `https://www.linguee.es/espanol-portugues/search?query=${props.word}` 
+      }}/>
 
     </Box>
   );
