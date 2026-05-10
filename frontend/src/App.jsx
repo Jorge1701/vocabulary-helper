@@ -57,7 +57,7 @@ function App() {
       </Box>
 
 			{result && (
-        <Box sx={{ maxWidth: 1000, mx: "auto", px: 3, py: 6 }}>
+        <Box sx={{ maxWidth: 1200, mx: "auto", px: 3, py: 6 }}>
 
 
 					{ /* Word and translation */ }
@@ -101,23 +101,25 @@ function App() {
 
 					{ /* Ejemplos de uso */ }
 
-					<Box sx={{ mb: 4 }}>
-            <SectionHeader icon={<FormatQuoteIcon color="primary" />} title="Ejemplos de uso" />
+					{ result.linguee_search.examples && (
+            <Box sx={{ mb: 4 }}>
+              <SectionHeader icon={<FormatQuoteIcon color="primary" />} title="Ejemplos de uso" />
 
-            <Stack>
-              { result.linguee_search.examples.map((ex, i) => (
-                <Card key={i} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}>
-                  <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", px: 2.5, py: 1.5 }}>
-                    <Typography sx={{ fontWeight: 500 }}>{ ex.source }</Typography>
-                  </Box>
-                  <Divider />
-                  <Box sx={{ borderLeft: "4px solid", borderColor: "text.disabled", px: 2.5, py: 1.5 }}>
-                    <Typography sx={{ color: "text.secondary" }}>{ ex.target }</Typography>
-                  </Box>
-                </Card>
-              )) }
-            </Stack>
-          </Box>
+              <Stack>
+                { result.linguee_search.examples.map((ex, i) => (
+                  <Card key={i} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}>
+                    <Box sx={{ borderLeft: "4px solid", borderColor: "primary.main", px: 2.5, py: 1.5 }}>
+                      <Typography sx={{ fontWeight: 500 }}>{ ex.source }</Typography>
+                    </Box>
+                    <Divider />
+                    <Box sx={{ borderLeft: "4px solid", borderColor: "text.disabled", px: 2.5, py: 1.5 }}>
+                      <Typography sx={{ color: "text.secondary" }}>{ ex.target }</Typography>
+                    </Box>
+                  </Card>
+                )) }
+              </Stack>
+            </Box>
+          ) }
 
 
 					{ /* Sinonimos */ }
@@ -135,7 +137,7 @@ function App() {
 
 					{ /* Info del verbo */ }
 
-          { result.conjugation_search.verb_info && (
+          { result.conjugation_search && (
             <Box sx={{ mb: 4 }}>
               <SectionHeader icon={<TranslateIcon color="primary" />} title="Información del verbo" />
 
@@ -167,6 +169,51 @@ function App() {
             ) }
 
 
+					{ /* Tablas de conjugaciones */ }
+
+          { result.conjugation_search && (
+            <Box>
+              <SectionHeader icon={<ConjugateIcon color="primary" />} title="Conjugaciones" />
+
+							<Grid container spacing={2}>
+                {[
+                  { label: "Presente", values: result.conjugation_search.presente },
+                  { label: "Pretérito Imperfeito", values: result.conjugation_search.preterito_imperfeito },
+                  { label: "Pretérito Perfeito", values: result.conjugation_search.preterito_perfeito },
+                  { label: "Pretérito Mais-que-perfeito", values: result.conjugation_search.preterito_mais_que_perfeito },
+                  { label: "Futuro do Presente", values: result.conjugation_search.futuro_do_presente },
+                  { label: "Futuro do Pretérito", values: result.conjugation_search.futuro_do_preterito },
+                ].map(({ label, values }) => (
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={label}>
+                    <Card sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, height: "100%" }}>
+                      <CardContent sx={{ pb: "12px !important" }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: "primary.main" }}>{ label }</Typography>
+                        <TableContainer>
+                          <Table size="small">
+                            <TableBody>
+                              {[
+                                { person: "Eu", value: values.first_per_sin },
+                                { person: "Tu", value: values.second_per_sin },
+                                { person: "Ele/ela/você", value: values.third_per_sin },
+                                { person: "Nós", value: values.first_per_plu },
+                                { person: "Vós", value: values.second_per_plu },
+                                { person: "Eles/elas/vocês", value: values.third_per_plu },
+                              ].map(({ person, value }) => (
+                                <TableRow key={person} sx={{ "&:last-child td": { border: 0 } }}>
+                                  <TableCell sx={{ color: "text.secondary", fontSize: "0.78rem", pl: 0, width: "45%" }}>{ person }</TableCell>
+                                  <TableCell sx={{ fontWeight: 500, pr: 0 }}>{ value }</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          ) }
         </Box>
       )}
     </div>
