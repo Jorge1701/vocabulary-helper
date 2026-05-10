@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import './App.css'
 import {
   TextField, Button, Box, Typography, Chip, Card, CardContent, Divider,
@@ -141,7 +141,7 @@ function App() {
 
 					{ /* Info del verbo */ }
 
-          { result.conjugation_search && (
+          { result.conjugation_search.found && (
             <Box sx={{ mb: 4 }}>
               <SectionHeader icon={<TranslateIcon color="primary" />} title="Información del verbo" />
 
@@ -175,7 +175,7 @@ function App() {
 
 					{ /* Tablas de conjugaciones */ }
 
-          { result.conjugation_search && (
+          { result.conjugation_search.found && (
             <Box sx={{ mb: 4 }}>
               <SectionHeader icon={<ConjugateIcon color="primary" />} title="Conjugaciones" />
 
@@ -225,13 +225,13 @@ function App() {
           <Box>
             <SectionHeader icon={<LinkIcon color="primary" />} title="Fuentes" />
         
-        		<Stack sx={{ gap: 1 }}>
+            <Stack sx={{ gap: 1 }}>
               {[
                 { label: "Dicio", url: result.dictionary_search.source_url },
                 { label: "Conjugacao", url: result.conjugation_search.source_url },
                 { label: "Linguee", url: result.linguee_search.source_url },
                 { label: "Reverso context", url: `https://context.reverso.net/traduccion/portugues-espanol/${input}` },
-              ].map(({label, url}) => (
+              ].filter(item => item.url !== undefined).map(({label, url}) => (
                 <Card key={label} elevation={1} sx={{ borderRadius: 2 }}>
                   <CardContent sx={{ py: "10px !important", px: 2 }}>
                     <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
