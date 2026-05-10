@@ -3,7 +3,7 @@ import './App.css'
 import {
   TextField, Button, Box, Typography, Chip, Card, CardContent, Divider,
   Grid, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, Stack
+  TableRow, Stack, Link
 } from "@mui/material";
 
 import TranslateIcon from "@mui/icons-material/Translate";
@@ -11,6 +11,19 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import ConjugateIcon from "@mui/icons-material/TableChart";
+import LinkIcon from "@mui/icons-material/Link";
+
+function FaviconImg({ url }) {
+  const domain = new URL(url).hostname;
+  return (
+    <img
+      src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
+      width={20}
+      height={20}
+      style={{ borderRadius: 4 }}
+    />
+  );
+}
 
 function SectionHeader({ icon, title }) {
   return (
@@ -31,15 +44,6 @@ function App() {
     setResult(data)
     console.log("Data:", data)
   }
-
-  useEffect(() => {
-    fetch(`http://localhost:8080/word/pulou`)
-    	.then(res => res.json())
-      .then(data => {
-        console.log(data)
-        setResult(data)
-      })
-  }, [])
 
   return (
     <div>
@@ -172,7 +176,7 @@ function App() {
 					{ /* Tablas de conjugaciones */ }
 
           { result.conjugation_search && (
-            <Box>
+            <Box sx={{ mb: 4 }}>
               <SectionHeader icon={<ConjugateIcon color="primary" />} title="Conjugaciones" />
 
 							<Grid container spacing={2}>
@@ -214,6 +218,34 @@ function App() {
               </Grid>
             </Box>
           ) }
+
+
+					{ /* Sources */ }
+
+          <Box>
+            <SectionHeader icon={<LinkIcon color="primary" />} title="Fuentes" />
+        
+        		<Stack sx={{ gap: 1 }}>
+              {[
+                { label: "Dicio", url: result.dictionary_search.source_url },
+                { label: "Conjugacao", url: result.conjugation_search.source_url },
+                { label: "Linguee", url: result.linguee_search.source_url },
+                { label: "Reverso context", url: `https://context.reverso.net/traduccion/portugues-espanol/${input}` },
+              ].map(({label, url}) => (
+                <Card key={label} elevation={1} sx={{ borderRadius: 2 }}>
+                  <CardContent sx={{ py: "10px !important", px: 2 }}>
+                    <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                      <Stack direction="row" sx={{ alignItems: "center", gap: 1.5 }}>
+                        <FaviconImg url={url} />
+                        <Typography variant="body2" sx={{ color: "text.secondary" }}>{ label }</Typography>
+                      </Stack>
+                      <Link variant="body2" href={url} target="_blank" rel="noopener noreferrer">{ url }</Link>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          </Box>
         </Box>
       )}
     </div>
