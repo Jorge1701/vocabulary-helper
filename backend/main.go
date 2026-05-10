@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"vocabulary-helper/conjugacao"
@@ -36,18 +37,32 @@ func main() {
 			return
 		}
 
-		lingueeResult := linguee.FindInLinguee(word)
-		dicioResult := dicio.FindInDicio(word)
+		searchResult := model.SearchResult{
+			SearchWord: word,
+			Type:       "Unknown",
+			Sources:    map[string]string{},
+		}
+
+		var dicioResult dicio.DicioSearch
 		conjugacaoResult := conjugacao.FindInConjugacao(word)
+
+		if conjugacaoResult.Found {
+			searchResult.Type = "Verb"
+			searchResult.VerbInfo = &conjugacaoResult.VerbInfo
+
+			searchResult.Sources["Conjugacao"] = conjugacaoResult.Source
+
+			fmt.Println(conjugacaoResult.SearchWord)
+			dicioResult = dicio.FindInDicio(conjugacaoResult.SearchWord)
+		} else {
+			dicioResult = dicio.FindInDicio(word)
+		}
+
+		lingueeResult := linguee.FindInLinguee(word)
 
 		if !dicioResult.Found && !conjugacaoResult.Found && !lingueeResult.Found {
 			http.Error(w, `{"error":"word not found"}`, http.StatusNotFound)
 			return
-		}
-
-		searchResult := model.SearchResult{
-			SearchWord: word,
-			Sources:    map[string]string{},
 		}
 
 		if lingueeResult.Found {
@@ -63,12 +78,6 @@ func main() {
 			searchResult.Synonyms = dicioResult.Synonyms
 
 			searchResult.Sources["Dicio"] = dicioResult.Source
-		}
-
-		if conjugacaoResult.Found {
-			searchResult.VerbInfo = &conjugacaoResult.VerbInfo
-
-			searchResult.Sources["Conjugacao"] = conjugacaoResult.Source
 		}
 
 		w.Header().Set("Content-Type", "application/json")

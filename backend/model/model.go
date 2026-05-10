@@ -31,6 +31,7 @@ type SearchResult struct {
 	SearchWord  string            `json:"search_word"`
 	FoundWord   string            `json:"found_word,omitempty"`
 	Translation string            `json:"translation,omitempty"`
+	Type        string            `json:"type,omitempty"`
 	Meanings    []string          `json:"meanings,omitempty"`
 	Examples    []Example         `json:"examples,omitempty"`
 	Synonyms    []string          `json:"synonyms,omitempty"`

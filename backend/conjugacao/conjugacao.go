@@ -21,11 +21,11 @@ type ConjugacaoSearch struct {
 	VerbInfo   model.VerbInfo
 }
 
-func FindConjugacaoInfo(word string) ConjugacaoSearch {
-	return searhForConjugacaoInfo(word, fmt.Sprint(CONJUGACAO_SEARCH_URL, word), true)
+func FindInConjugacao(word string) ConjugacaoSearch {
+	return fetchAndParseConjugacaoInfo(word, fmt.Sprint(CONJUGACAO_SEARCH_URL, word), true)
 }
 
-func searhForConjugacaoInfo(word, url string, deepSearch bool) ConjugacaoSearch {
+func fetchAndParseConjugacaoInfo(word, url string, deepSearch bool) ConjugacaoSearch {
 	c := utils.CreateCollector()
 
 	c.OnRequest(func(r *colly.Request) {
@@ -107,7 +107,8 @@ func searhForConjugacaoInfo(word, url string, deepSearch bool) ConjugacaoSearch 
 			linkToVerb := e.DOM.Find("#content div > h2 > a")
 
 			if linkToVerb.Length() > 0 {
-				verbInfo = searhForConjugacaoInfo(word, fmt.Sprint(CONJUGACAO_DIRECT_URL, linkToVerb.Text()), false)
+				foundWord := linkToVerb.Text()
+				verbInfo = fetchAndParseConjugacaoInfo(foundWord, fmt.Sprint(CONJUGACAO_DIRECT_URL, foundWord), false)
 			}
 		}
 	})
