@@ -3,7 +3,7 @@ package conjugations
 import (
 	"fmt"
 	"strings"
-	"time"
+	"vocabulary-helper/utils"
 
 	"github.com/gocolly/colly/v2"
 )
@@ -15,21 +15,26 @@ const (
 )
 
 type Conjugations struct {
-	FirstPersonSingular  string `json:"first_person_singular,omitempty"`
-	SecondPersonSingular string `json:"second_person_singular,omitempty"`
-	ThirdPersonSingular  string `json:"third_person_singular,omitempty"`
-	FirstPersonPlural    string `json:"first_person_plural,omitempty"`
-	SecondPersonPlural   string `json:"second_person_plural,omitempty"`
-	ThirdPersonPlural    string `json:"third_person_plural,omitempty"`
+	FirstPersonSingular  string `json:"first_per_sin,omitempty"`
+	SecondPersonSingular string `json:"second_per_sin,omitempty"`
+	ThirdPersonSingular  string `json:"third_per_sin,omitempty"`
+	FirstPersonPlural    string `json:"first_per_plu,omitempty"`
+	SecondPersonPlural   string `json:"second_per_plu,omitempty"`
+	ThirdPersonPlural    string `json:"third_per_plu,omitempty"`
 }
 
 type VerbInfo struct {
+	Infinitivo        string `json:"infinitivo,omitempty"`
+	TipoDeVerbo       string `json:"tipo_de_verbo,omitempty"`
+	Gerundio          string `json:"gerundio,omitempty"`
+	ParticipioPassado string `json:"participio_passado,omitempty"`
+}
+
+type ConjugationSearch struct {
 	Found                    bool          `json:"found"`
 	Source                   string        `json:"source_url,omitempty"`
-	Infinitivo               string        `json:"infinitivo,omitempty"`
-	TipoDeVerbo              string        `json:"tipo_de_verbo,omitempty"`
-	Gerundio                 string        `json:"gerundio,omitempty"`
-	ParticipioPassado        string        `json:"participio_passado,omitempty"`
+	SearchWord               string        `json:"search_word"`
+	VerbInfo                 *VerbInfo     `json:"verb_info,omitempty"`
 	Presente                 *Conjugations `json:"presente,omitempty"`
 	PreteritoImperfeito      *Conjugations `json:"preterito_imperfeito,omitempty"`
 	PreteritoPerfeito        *Conjugations `json:"preterito_perfeito,omitempty"`
@@ -38,23 +43,20 @@ type VerbInfo struct {
 	FuturoDoPreterito        *Conjugations `json:"futuro_do_preterito,omitempty"`
 }
 
-func parseColon(text string) string {
-	if strings.Contains(text, ":") {
-		return strings.TrimSpace(strings.Split(text, ":")[1])
-	} else {
-		return strings.TrimSpace(text)
-	}
+func FindVerbInfo(word string) ConjugationSearch {
+	return searchForVerbInfo(word, fmt.Sprint(CONJUGACAO_SEARCH_URL, word), true)
 }
 
-func searchForVerbInfo(url string, deepSearch bool) VerbInfo {
-	c := createCollector()
+func searchForVerbInfo(word, url string, deepSearch bool) ConjugationSearch {
+	c := utils.CreateCollector()
 
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println("Searching for verb info ...", r.URL.String())
 	})
 
-	verbInfo := VerbInfo{
-		Found: false,
+	verbInfo := ConjugationSearch{
+		Found:      false,
+		SearchWord: word,
 	}
 
 	c.OnHTML("html", func(e *colly.HTMLElement) {
@@ -66,10 +68,12 @@ func searchForVerbInfo(url string, deepSearch bool) VerbInfo {
 			verbInfo.Source = url
 
 			// Obtain info
-			verbInfo.Gerundio = parseColon(info.Find("p.verb-info--main > span:nth-child(1) > span > span").First().Text())
-			verbInfo.ParticipioPassado = parseColon(info.Find("p.verb-info--main > span:nth-child(2) > span > span.f").First().Text())
-			verbInfo.Infinitivo = parseColon(info.Find("p.verb-info--main > span:nth-child(3)").First().Text())
-			verbInfo.TipoDeVerbo = parseColon(info.Find("p.verb-info--sec > span:nth-child(1)").First().Text())
+			verbInfo.VerbInfo = &VerbInfo{
+				Gerundio:          parseColon(info.Find("p.verb-info--main > span:nth-child(1) > span > span").First().Text()),
+				ParticipioPassado: parseColon(info.Find("p.verb-info--main > span:nth-child(2) > span > span.f").First().Text()),
+				Infinitivo:        parseColon(info.Find("p.verb-info--main > span:nth-child(3)").First().Text()),
+				TipoDeVerbo:       parseColon(info.Find("p.verb-info--sec > span:nth-child(1)").First().Text()),
+			}
 
 			// Obtain conjugacao
 			verbInfo.Presente = &Conjugations{
@@ -125,7 +129,7 @@ func searchForVerbInfo(url string, deepSearch bool) VerbInfo {
 			linkToVerb := e.DOM.Find("#content div > h2 > a")
 
 			if linkToVerb.Length() > 0 {
-				verbInfo = searchForVerbInfo(fmt.Sprint(CONJUGACAO_DIRECT_URL, linkToVerb.Text()), false)
+				verbInfo = searchForVerbInfo(word, fmt.Sprint(CONJUGACAO_DIRECT_URL, linkToVerb.Text()), false)
 			}
 		}
 	})
@@ -135,81 +139,10 @@ func searchForVerbInfo(url string, deepSearch bool) VerbInfo {
 	return verbInfo
 }
 
-func FindVerbInfo(word string) VerbInfo {
-	return searchForVerbInfo(fmt.Sprint(CONJUGACAO_SEARCH_URL, word), true)
-}
-
-func do() {
-	words := []string{
-		"átimo",
-		"pulou",
-		"retardatário",
-		"sumiu",
-		"comprido",
-		"atirava",
-		"macaquices",
-		"tocou",
-		"fêmea",
-		"ajoelhou",
-		"voou",
-		"despencou",
-		"demorada",
-		"estatelar",
-		"estendida",
-	}
-
-	for _, word := range words {
-		verbInfo := FindVerbInfo(word)
-		PrintVerbInfo(word, verbInfo)
-	}
-}
-
-func PrintVerbInfo(word string, verbInfo VerbInfo) {
-	if verbInfo.Found {
-		fmt.Printf("\n\n---- | '%s'\n\n", word)
-		fmt.Printf("Gerúndio: '%s'\n", verbInfo.Gerundio)
-		fmt.Printf("Particípio passado: '%s'\n", verbInfo.ParticipioPassado)
-		fmt.Printf("Infinitivo: '%s'\n", verbInfo.Infinitivo)
-		fmt.Printf("Tipo de verbo: '%s'\n", verbInfo.TipoDeVerbo)
-
-		fmt.Printf("\n--| ")
-		fmt.Printf("Presente:\n")
-		printConjugations(verbInfo.Presente)
-		fmt.Printf("--| ")
-		fmt.Printf("Pretérito Imperfeito:\n")
-		printConjugations(verbInfo.PreteritoImperfeito)
-		fmt.Printf("--| ")
-		fmt.Printf("Pretérito Perfeito:\n")
-		printConjugations(verbInfo.PreteritoPerfeito)
-		fmt.Printf("--| ")
-		fmt.Printf("Pretérito Máis-que-perfeito:\n")
-		printConjugations(verbInfo.PreteritoMaisQuePerfeito)
-		fmt.Printf("--| ")
-		fmt.Printf("Futuro do Presente:\n")
-		printConjugations(verbInfo.FuturoDoPresente)
-		fmt.Printf("--| ")
-		fmt.Printf("Futuro do Pretérifo:\n")
-		printConjugations(verbInfo.FuturoDoPreterito)
+func parseColon(text string) string {
+	if strings.Contains(text, ":") {
+		return strings.TrimSpace(strings.Split(text, ":")[1])
 	} else {
-		fmt.Printf("\n\n---- | '%s'\n\n", word)
-		fmt.Printf("\nNOT FOUND\n\n")
+		return strings.TrimSpace(text)
 	}
-
-	fmt.Printf("--------------------------------------------------------------------\n")
-}
-
-func printConjugations(c *Conjugations) {
-	fmt.Printf("Eu %s\n", c.FirstPersonSingular)
-	fmt.Printf("Tu %s\n", c.SecondPersonSingular)
-	fmt.Printf("Você/ele/ela %s\n", c.ThirdPersonSingular)
-	fmt.Printf("Nós %s\n", c.FirstPersonPlural)
-	fmt.Printf("Vós %s\n", c.SecondPersonPlural)
-	fmt.Printf("Vocês/eles/elas %s\n", c.ThirdPersonPlural)
-}
-
-func createCollector() *colly.Collector {
-	return colly.NewCollector(
-		colly.CacheDir(COLLY_CACHE_DIR),
-		colly.CacheExpiration(24*time.Hour),
-	)
 }
