@@ -15,11 +15,10 @@ const (
 )
 
 type DicioSearch struct {
-	Found      bool
-	SearchWord string
-	Source     string
-	Meanings   []string
-	Synonyms   []string
+	Found    bool
+	Source   string
+	Meanings []string
+	Synonyms []string
 }
 
 func FindInDicio(word string) DicioSearch {
@@ -30,8 +29,7 @@ func fetchAndParseDicioInfo(word, url string, deepSearch bool) DicioSearch {
 	c := utils.CreateCollector()
 
 	dictionaryInfo := DicioSearch{
-		Found:      false,
-		SearchWord: word,
+		Found: false,
 	}
 
 	c.OnRequest(func(r *colly.Request) {

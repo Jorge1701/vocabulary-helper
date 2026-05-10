@@ -10,22 +10,22 @@ import (
 )
 
 const (
-	LINGUEE_URL = "https://www.linguee.es/espanol-portugues/search?query="
+	LINGUEE_URL = "https://www.linguee.es/portugues-espanol/search?query="
 )
 
 type LingueeSearch struct {
 	Found       bool
-	SearchWord  string
+	FoundWord   string
 	Source      string
 	Translation string
 	Examples    []model.Example
 }
 
 func FindInLinguee(word string) LingueeSearch {
-	return fetchAndParseLingueeInfo(word, fmt.Sprint(LINGUEE_URL, word))
+	return fetchAndParseLingueeInfo(fmt.Sprint(LINGUEE_URL, word))
 }
 
-func fetchAndParseLingueeInfo(word, url string) LingueeSearch {
+func fetchAndParseLingueeInfo(url string) LingueeSearch {
 	c := utils.CreateCollector()
 
 	c.OnRequest(func(r *colly.Request) {
@@ -33,8 +33,7 @@ func fetchAndParseLingueeInfo(word, url string) LingueeSearch {
 	})
 
 	lingueeSearch := LingueeSearch{
-		Found:      false,
-		SearchWord: word,
+		Found: false,
 	}
 
 	c.OnHTML("html", func(e *colly.HTMLElement) {
@@ -43,6 +42,9 @@ func fetchAndParseLingueeInfo(word, url string) LingueeSearch {
 		if info.Length() > 0 {
 			lingueeSearch.Found = true
 			lingueeSearch.Source = url
+
+			// Get found word
+			lingueeSearch.FoundWord = info.Find("div > h2 > span.tag_lemma > a.dictLink").First().Text()
 
 			// Get translation
 			lingueeSearch.Translation = info.Find("div.translation h3.translation_desc a.featured").First().Text()

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"vocabulary-helper/conjugacao"
@@ -53,7 +52,6 @@ func main() {
 
 			searchResult.Sources["Conjugacao"] = conjugacaoResult.Source
 
-			fmt.Println(conjugacaoResult.SearchWord)
 			dicioResult = dicio.FindInDicio(conjugacaoResult.VerbInfo.Infinitive)
 		} else {
 			dicioResult = dicio.FindInDicio(word)
@@ -65,7 +63,7 @@ func main() {
 		}
 
 		if lingueeResult.Found {
-			searchResult.FoundWord = lingueeResult.SearchWord
+			searchResult.FoundWord = lingueeResult.FoundWord
 			searchResult.Translation = lingueeResult.Translation
 			searchResult.Examples = lingueeResult.Examples
 

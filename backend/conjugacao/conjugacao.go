@@ -15,17 +15,16 @@ const (
 )
 
 type ConjugacaoSearch struct {
-	Found      bool
-	SearchWord string
-	Source     string
-	VerbInfo   model.VerbInfo
+	Found    bool
+	Source   string
+	VerbInfo model.VerbInfo
 }
 
 func FindInConjugacao(word string) ConjugacaoSearch {
-	return fetchAndParseConjugacaoInfo(word, fmt.Sprint(CONJUGACAO_SEARCH_URL, word), true)
+	return fetchAndParseConjugacaoInfo(fmt.Sprint(CONJUGACAO_SEARCH_URL, word), true)
 }
 
-func fetchAndParseConjugacaoInfo(word, url string, deepSearch bool) ConjugacaoSearch {
+func fetchAndParseConjugacaoInfo(url string, deepSearch bool) ConjugacaoSearch {
 	c := utils.CreateCollector()
 
 	c.OnRequest(func(r *colly.Request) {
@@ -33,8 +32,7 @@ func fetchAndParseConjugacaoInfo(word, url string, deepSearch bool) ConjugacaoSe
 	})
 
 	verbInfo := ConjugacaoSearch{
-		Found:      false,
-		SearchWord: word,
+		Found: false,
 	}
 
 	c.OnHTML("html", func(e *colly.HTMLElement) {
@@ -108,7 +106,7 @@ func fetchAndParseConjugacaoInfo(word, url string, deepSearch bool) ConjugacaoSe
 
 			if linkToVerb.Length() > 0 {
 				foundWord := linkToVerb.Text()
-				verbInfo = fetchAndParseConjugacaoInfo(foundWord, fmt.Sprint(CONJUGACAO_DIRECT_URL, foundWord), false)
+				verbInfo = fetchAndParseConjugacaoInfo(fmt.Sprint(CONJUGACAO_DIRECT_URL, foundWord), false)
 			}
 		}
 	})
