@@ -125,5 +125,20 @@ func getSearchResultFor(word string) model.SearchResult {
 		searchResult.Sources["WikDict"] = databaseSearch.Source
 	}
 
+	if _, exists := searchResult.Sources["Dicio"]; !exists {
+		searchResult.Sources["Dicio"] = fmt.Sprint(dicio.DICIO_SEARCH_URL, word)
+	}
+	if _, exists := searchResult.Sources["Linguee"]; !exists {
+		searchResult.Sources["Linguee"] = fmt.Sprint(linguee.LINGUEE_URL, word)
+	}
+	if _, exists := searchResult.Sources["Conjugacao"]; !exists {
+		searchResult.Sources["Conjugacao"] = fmt.Sprint(conjugacao.CONJUGACAO_SEARCH_URL, word)
+	}
+	if _, exists := searchResult.Sources["WikDict"]; !exists {
+		searchResult.Sources["WikDict"] = fmt.Sprint(database.WIKDICT_URL, word)
+	}
+
+	// TODO ADD https://pt.wiktionary.org
+
 	return searchResult
 }
