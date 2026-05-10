@@ -1,4 +1,4 @@
-package conjugations
+package conjugacao
 
 import (
 	"fmt"
@@ -14,25 +14,25 @@ const (
 	CONJUGACAO_DIRECT_URL = "https://www.conjugacao.com.br/verbo-"
 )
 
-type ConjugationSearch struct {
+type ConjugacaoSearch struct {
 	Found      bool
 	SearchWord string
 	Source     string
 	VerbInfo   model.VerbInfo
 }
 
-func FindVerbInfo(word string) ConjugationSearch {
-	return searchForVerbInfo(word, fmt.Sprint(CONJUGACAO_SEARCH_URL, word), true)
+func FindConjugacaoInfo(word string) ConjugacaoSearch {
+	return searhForConjugacaoInfo(word, fmt.Sprint(CONJUGACAO_SEARCH_URL, word), true)
 }
 
-func searchForVerbInfo(word, url string, deepSearch bool) ConjugationSearch {
+func searhForConjugacaoInfo(word, url string, deepSearch bool) ConjugacaoSearch {
 	c := utils.CreateCollector()
 
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println("Searching for verb info ...", r.URL.String())
 	})
 
-	verbInfo := ConjugationSearch{
+	verbInfo := ConjugacaoSearch{
 		Found:      false,
 		SearchWord: word,
 	}
@@ -107,7 +107,7 @@ func searchForVerbInfo(word, url string, deepSearch bool) ConjugationSearch {
 			linkToVerb := e.DOM.Find("#content div > h2 > a")
 
 			if linkToVerb.Length() > 0 {
-				verbInfo = searchForVerbInfo(word, fmt.Sprint(CONJUGACAO_DIRECT_URL, linkToVerb.Text()), false)
+				verbInfo = searhForConjugacaoInfo(word, fmt.Sprint(CONJUGACAO_DIRECT_URL, linkToVerb.Text()), false)
 			}
 		}
 	})

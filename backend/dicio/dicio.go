@@ -1,4 +1,4 @@
-package dictionary
+package dicio
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ const (
 	MAX_MEANINGS_TO_EXTRACT = 2
 )
 
-type DictionarySearch struct {
+type DicioSearch struct {
 	Found      bool
 	SearchWord string
 	Source     string
@@ -22,14 +22,14 @@ type DictionarySearch struct {
 	Synonyms   []string
 }
 
-func FindDictionaryInfo(word string) DictionarySearch {
-	return searchForDictionaryInfo(word, fmt.Sprint(DICIO_SEARCH_URL, word), true)
+func FindInDicio(word string) DicioSearch {
+	return fetchAndParseDicioInfo(word, fmt.Sprint(DICIO_SEARCH_URL, word), true)
 }
 
-func searchForDictionaryInfo(word, url string, deepSearch bool) DictionarySearch {
+func fetchAndParseDicioInfo(word, url string, deepSearch bool) DicioSearch {
 	c := utils.CreateCollector()
 
-	dictionaryInfo := DictionarySearch{
+	dictionaryInfo := DicioSearch{
 		Found:      false,
 		SearchWord: word,
 	}
@@ -69,7 +69,7 @@ func searchForDictionaryInfo(word, url string, deepSearch bool) DictionarySearch
 			}
 
 			if href, exists := match.Attr("href"); exists {
-				dictionaryInfo = searchForDictionaryInfo(word, fmt.Sprint(DICIO_DIRECT_URL, href), false)
+				dictionaryInfo = fetchAndParseDicioInfo(word, fmt.Sprint(DICIO_DIRECT_URL, href), false)
 			}
 		}
 	})

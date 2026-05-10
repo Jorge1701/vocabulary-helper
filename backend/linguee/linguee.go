@@ -21,11 +21,11 @@ type LingueeSearch struct {
 	Examples    []model.Example
 }
 
-func FindLingueeSearch(word string) LingueeSearch {
-	return searchForLingueeInfo(word, fmt.Sprint(LINGUEE_URL, word))
+func FindInLinguee(word string) LingueeSearch {
+	return fetchAndParseLingueeInfo(word, fmt.Sprint(LINGUEE_URL, word))
 }
 
-func searchForLingueeInfo(word, url string) LingueeSearch {
+func fetchAndParseLingueeInfo(word, url string) LingueeSearch {
 	c := utils.CreateCollector()
 
 	c.OnRequest(func(r *colly.Request) {

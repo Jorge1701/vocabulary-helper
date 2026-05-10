@@ -4,17 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-	"vocabulary-helper/conjugations"
-	"vocabulary-helper/dictionary"
+	"vocabulary-helper/conjugacao"
+	"vocabulary-helper/dicio"
 	"vocabulary-helper/linguee"
 	"vocabulary-helper/model"
 )
-
-type WordInfo struct {
-	DictionarySearch  *dictionary.DictionarySearch    `json:"dictionary_search,omitempty"`
-	ConjugationSearch *conjugations.ConjugationSearch `json:"conjugation_search,omitempty"`
-	LingueeSearch     *linguee.LingueeSearch          `json:"linguee_search,omitempty"`
-}
 
 func enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,40 +36,39 @@ func main() {
 			return
 		}
 
-		lingueeSearch := linguee.FindLingueeSearch(word)
-		dictionaryInfo := dictionary.FindDictionaryInfo(word)
-		verbInfo := conjugations.FindVerbInfo(word)
+		lingueeResult := linguee.FindInLinguee(word)
+		dicioResult := dicio.FindInDicio(word)
+		conjugacaoResult := conjugacao.FindInConjugacao(word)
 
-		if !dictionaryInfo.Found && !verbInfo.Found && !lingueeSearch.Found {
+		if !dicioResult.Found && !conjugacaoResult.Found && !lingueeResult.Found {
 			http.Error(w, `{"error":"word not found"}`, http.StatusNotFound)
 			return
 		}
 
 		searchResult := model.SearchResult{
 			SearchWord: word,
-			Examples:   []model.Example{},
 			Sources:    map[string]string{},
 		}
 
-		if lingueeSearch.Found {
-			searchResult.FoundWord = lingueeSearch.SearchWord
-			searchResult.Translation = lingueeSearch.Translation
-			searchResult.Examples = lingueeSearch.Examples
+		if lingueeResult.Found {
+			searchResult.FoundWord = lingueeResult.SearchWord
+			searchResult.Translation = lingueeResult.Translation
+			searchResult.Examples = lingueeResult.Examples
 
-			searchResult.Sources["Linguee"] = lingueeSearch.Source
+			searchResult.Sources["Linguee"] = lingueeResult.Source
 		}
 
-		if dictionaryInfo.Found {
-			searchResult.Meanings = dictionaryInfo.Meanings
-			searchResult.Synonyms = dictionaryInfo.Synonyms
+		if dicioResult.Found {
+			searchResult.Meanings = dicioResult.Meanings
+			searchResult.Synonyms = dicioResult.Synonyms
 
-			searchResult.Sources["Dicio"] = dictionaryInfo.Source
+			searchResult.Sources["Dicio"] = dicioResult.Source
 		}
 
-		if verbInfo.Found {
-			searchResult.VerbInfo = &verbInfo.VerbInfo
+		if conjugacaoResult.Found {
+			searchResult.VerbInfo = &conjugacaoResult.VerbInfo
 
-			searchResult.Sources["Conjugacao"] = verbInfo.Source
+			searchResult.Sources["Conjugacao"] = conjugacaoResult.Source
 		}
 
 		w.Header().Set("Content-Type", "application/json")
